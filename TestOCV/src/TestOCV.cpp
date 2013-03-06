@@ -11,14 +11,6 @@
 
 using namespace std;
 
-int g_switch_value = 0;
-int filterInt = 0;
-int lastfilterInt = -1;
-void switch_callback( int position ){
-	filterInt = position;
-}
-double fillDiff = 5.0;
-
 int main(void)
 {
 	FLANDMARK_Model * model = flandmark_init("data/flandmark_model.dat");
@@ -26,7 +18,6 @@ int main(void)
 	double * landmarks = (double*)malloc(2*model->data.options.M*sizeof(double));  //used to be float *
 	cout << "test" << endl;
 	char key;
-	int smoothing_kernel_size = 3;
 	IplImage* image, *imgout;
 	imgout = 0;
 	CvSeq* rects;
@@ -50,13 +41,8 @@ int main(void)
 	            int flags =  CV_HAAR_DO_CANNY_PRUNING;
 
 	cvNamedWindow( "Example", CV_WINDOW_AUTOSIZE );
-	//cvNamedWindow( "Output", CV_WINDOW_AUTOSIZE );
-	//cvCreateTrackbar( "Filters", "Output", &g_switch_value, 5, switch_callback );
-	//CvPoint seed_point = cvPoint(305,195);
-	//CvScalar color = CV_RGB(250,0,0);
-	//cvMoveWindow( "Output", 300, 100 );
 
-	    CvCapture* capture;
+	CvCapture* capture;
 	if((capture = cvCreateCameraCapture ( 0 ))==0){
 		cout<<"ERROR: NO CAMERAS DETECTED."<<endl;
 		return 0;
@@ -91,76 +77,23 @@ int main(void)
 				for (int i = 2; i < 2*model->data.options.M; i += 2)
 				{
 					cvCircle(image, cvPoint(int(landmarks[i]), int(landmarks[i+1])), 3, CV_RGB(255,0,0), CV_FILLED);
-
 				}
 			}
 
-				/*
-		switch( filterInt ){
-
-					case 1:
-						//cvSmooth( img, out, CV_GAUSSIAN, 7, 7 );
-						cvSmooth( image, imgout, CV_GAUSSIAN, smoothing_kernel_size, smoothing_kernel_size );
-						break;
-					case 2:
-						//cvSmooth( img, out, CV_MEDIAN, 7, 7 );
-						cvSmooth( image, imgout, CV_MEDIAN, smoothing_kernel_size, smoothing_kernel_size );
-						break;
-					case 3:
-						cvErode( image, imgout, NULL, 1);
-						break;
-					case 4:
-						cvDilate( image, imgout, NULL, 1);
-						break;
-					case 5:
-						cvSmooth( image, imgout, CV_GAUSSIAN, 1, 1 );
-						cvFloodFill( imgout, seed_point, color, cvScalarAll(fillDiff), cvScalarAll(fillDiff), NULL, 4, NULL );
-						break;
-		}*/
-
-		//cvShowImage( "Output", imgout );
 		cvShowImage( "Example", image );
 
-		////cvReleaseImage( &image );
-		//cvReleaseImage( &imgout );
 
 		key=cvWaitKey(5);
 
 		if( key == 27 ) {
 			cout << "Exiting on KEY: " << key << endl;
 			break;
-		} else if( key == 32 ) {
-			cout << "Writing info on Space: " << image->width << "x" << image->height << endl;
-			cout << "nChannels: " << image->nChannels << ", data[0]: " << image->imageData[0] <<  endl;
-		} else if( key == 51 ) { //3
-			smoothing_kernel_size = 3;
-			cout << "smoothing: " << smoothing_kernel_size << endl;
-		} else if( key == 52 ) {
-			smoothing_kernel_size = 5;
-			cout << "smoothing: " << smoothing_kernel_size << endl;
-		} else if( key == 53 ) {
-			smoothing_kernel_size = 11;
-			cout << "smoothing: " << smoothing_kernel_size << endl;
-		} else if( key == 54 ) {
-			smoothing_kernel_size = 21;
-			cout << "smoothing: " << smoothing_kernel_size << endl;
-		} else if( key == 55 ) { //7
-			smoothing_kernel_size = 31;
-			cout << "smoothing: " << smoothing_kernel_size << endl;
-		} else if( key == 119 ) { //7
-			fillDiff *= 1.05;
-			cout << "fillDiff: " << fillDiff << endl;
-		} else if( key == 115 ) { //7
-			fillDiff *= 0.95;
-			cout << "fillDiff: " << fillDiff << endl;
 		}
-
 	}
 	if(imgout) {
 		cvReleaseImage( &imgout );
 	}
 	cvReleaseCapture(&capture);
 	cvDestroyWindow( "Example" );
-	//cvDestroyWindow( "Output" );
 	return 0;
 }
